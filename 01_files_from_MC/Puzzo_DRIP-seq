@@ -1,0 +1,82 @@
+Puzzo and bioinformatician have aligned DRIP-seq accoridng to Chedin, but the bigwig files are blank.
+
+They give me fastq files and a bam file to check
+
+-See what the probem is and then give them this script.
+
+
+This is what I did do check Stephan's DRIP-seq files:
+
+
+# SRX2481503_1.fastq.gz  SRX2481503_2.fastq.gz  SRX2481504_1.fastq.gz  SRX2481504_2.fastq.gz  SRX2918366_1.fastq.gz  SRX2918366_2.fastq.gz  SRX2918367_1.fastq.gz  SRX2918367_2.fastq.gz
+
+
+#bowtie2 -p 8 --no-unal --no-mixed --no-discordant -x /Users/cimprich/Genomics/indexes/hg38/hg38 -1 SRX2481503_1.fastq.gz -2 SRX2481503_2.fastq.gz | samtools view -bSh > SRX2481503.bam
+#bowtie2 -p 8 --no-unal --no-mixed --no-discordant -x /Users/cimprich/Genomics/indexes/hg38/hg38 -1 SRX2481504_1.fastq.gz -2 SRX2481504_2.fastq.gz | samtools view -bSh > SRX2481504.bam
+#bowtie2 -p 8 --no-unal --no-mixed --no-discordant -x /Users/cimprich/Genomics/indexes/hg38/hg38 -1 SRX2918366_1.fastq.gz -2 SRX2918366_2.fastq.gz | samtools view -bSh > SRX2918366.bam
+#bowtie2 -p 8 --no-unal --no-mixed --no-discordant -x /Users/cimprich/Genomics/indexes/hg38/hg38 -1 SRX2918367_1.fastq.gz -2 SRX2918367_2.fastq.gz | samtools view -bSh > SRX2918367.bam
+
+samtools sort -@8 -o SRX2481503_sorted.bam SRX2481503.bam
+samtools sort -@8 -o SRX2481504_sorted.bam SRX2481504.bam
+samtools sort -@8 -o SRX2918366_sorted.bam SRX2918366.bam
+samtools sort -@8 -o SRX2918367_sorted.bam SRX2918367.bam
+
+samtools index SRX2481503_sorted.bam 
+samtools index SRX2481504_sorted.bam 
+samtools index SRX2918366_sorted.bam 
+samtools index SRX2918367_sorted.bam
+
+
+
+
+cat files_names.txt 
+
+SRX2481503.bam
+SRX2481504.bam
+SRX2918366.bam
+SRX2918367.bam
+
+
+cat files_names.txt | xargs -I {} -P10 sh -c 'bedtools bamtobed -i {} > {}.bed'
+find *.bed | sed 's/\.bed//' | xargs -I {} gsort --parallel=8 -u -k1,1 -k2,2n -k3,3n -o rmdup/{}.bed {}.bed
+find *.bed | sed 's/\.bed//' | xargs -I {} sh -c 'bedtools genomecov -bg -g /Volumes/Pegasus/shared_files/util/hg38.chrom.sizes -i rmdup/{}.bed > tracks/{}.bedGraph'
+find *.bed | sed 's/\.bed//' | xargs -I {} -P6  /Volumes/Pegasus/shared_files/util/bedGraphToBigWig tracks/{}.bedGraph /Volumes/Pegasus/shared_files/util/hg38.chrom.sizes tracks/{}.bw
+
+
+
+scp cimprich@cimprichserver://Volumes/Pegasus/shared_files/public_data/enhancers/HeLaS3* /Users/madziacrossley/Box/MPC_files/Madzia_Laptop/Documents/cytoDRIP_May2020
+
+
+
+
+scp /Users/madziacrossley/Box/MPC_files/Madzia_Laptop/Documents/Madzia_work/Sequencing/cytoDRIP_2/filter_peak_calls_MPC.ipynb cimprich@cimprichserver:/Volumes/Pegasus/cytoDRIP2_SETX/mike_stuff/notebooks/madzia_notebooks/
+
+#Align paired ended fastq files
+
+bowtie2 -p 8 --no-unal --no-mixed --no-discordant -x /Users/cimprich/Genomics/indexes/hg38/hg38 -1 SRX2481503_1.fastq.gz -2 SRX2481503_2.fastq.gz | samtools view -bSh > SRX2481503.bam
+
+#Sort and index bam files
+
+samtools sort -@8 -o SRX2481503_sorted.bam SRX2481503.bam
+samtools index SRX2481503_sorted.bam 
+
+#Remove duplicates
+
+cat files_names.txt 
+
+SRX2481503.bam
+SRX2481504.bam
+SRX2918366.bam
+SRX2918367.bam
+
+cat files_names.txt | xargs -I {} -P10 sh -c 'bedtools bamtobed -i {} > {}.bed'
+find *.bed | sed 's/\.bed//' | xargs -I {} gsort --parallel=8 -u -k1,1 -k2,2n -k3,3n -o rmdup/{}.bed {}.bed
+
+#make bedgraphs
+find *.bed | sed 's/\.bed//' | xargs -I {} sh -c 'bedtools genomecov -bg -g /Volumes/Pegasus/shared_files/util/hg38.chrom.sizes -i rmdup/{}.bed > tracks/{}.bedGraph'
+
+#make bigwig tracks
+find *.bed | sed 's/\.bed//' | xargs -I {} -P6  /Volumes/Pegasus/shared_files/util/bedGraphToBigWig tracks/{}.bedGraph /Volumes/Pegasus/shared_files/util/hg38.chrom.sizes tracks/{}.bw
+
+#note that these files are not normalized. You should normalize to reads per million. I can help with that if needed
+

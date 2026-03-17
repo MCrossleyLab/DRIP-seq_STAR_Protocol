@@ -1,0 +1,856 @@
+
+Puzzo DRIP-seq
+
+
+#Do metagene and aggregate plots using mouse gene annotations
+
+Download from UCSC table browser:
+
+https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1616113915_qeZYlNUCaLNkAJzskaqK9pHarFwy&clade=mammal&org=Mouse&db=mm10&hgta_group=genes&hgta_track=knownGene&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C694%2C976-56%2C714%2C605&hgta_outputType=bed&hgta_outFileName=
+
+
+-group: genes and gene predictions
+-track: genecode vm23
+-region: genome
+tabble: knowngene
+-gzip compressed
+-output format: bed
+-whole gene format
+
+Header description:
+Database: mm10    Primary Table: knownGene    Row Count: 142,446   Data last updated: 2019-09-19
+Format description: Transcript from default gene set in UCSC browser
+On download server: MariaDB table dump directory
+field	example	SQL type	info	description
+name	ENSMUST00000193812.1	varchar(255)	values	Name of gene
+chrom	chr1	varchar(255)	values	Reference sequence chromosome or scaffold
+strand	+	char(1)	values	+ or - for strand
+txStart	3073252	int(10) unsigned	range	Transcription start position (or end position for minus strand item)
+txEnd	3074322	int(10) unsigned	range	Transcription end position (or start position for minus strand item)
+cdsStart	3073252	int(10) unsigned	range	Coding region start (or end position if for minus strand item)
+cdsEnd	3073252	int(10) unsigned	range	Coding region end (or start position if for minus strand item)
+exonCount	1	int(10) unsigned	range	Number of exons
+exonStarts	3073252,	longblob	 	Exon start positions (or end positions for minus strand item)
+exonEnds	3074322,	longblob	 	Exon end positions (or start positions for minus strand item)
+proteinID	 	varchar(40)	values	UniProt display ID, UniProt accession, or RefSeq protein ID
+alignID	uc287gdb.1	varchar(255)	values	Unique identifier (GENCODE transcript ID for GENCODE Basic)
+
+
+Copy to server
+scp /Users/madziacrossley/Desktop/mm10.chrom.sizes cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+scp /Users/madziacrossley/Desktop/mm10_gencodevm23.bed.gz cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+
+gunzip mm10_gencodevm23.bed.gz
+cut -f 1,2,3,4,5,6 mm10_gencodevm23.bed > mm10_gencodevm23.6cols.bed
+
+ scp /Users/madziacrossley/MPC_files/Normalized_bigwig_Dripseq/*.bw cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+ scp /Users/madziacrossley/MPC_files/Bam_files/*.bam cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+
+sample_names.txt
+
+V1_Input-1_Hepa_normalized.bw
+V1_Input-1_L.normalized.bw
+V1_Input-2_Hepa.normalized.bw
+V1_Input-2_L.normalized.bw
+V1_RNH--1_Hepa.normalized.bw
+V1_RNH--1_L.normalized.bw
+V1_RNH--2_Hepa.normalized.bw
+V1_RNH--2_L.normalized.bw
+V1_RNHplus-1_Hepa_normalized.bw
+V1_RNHplus-1_L_normalized.bw
+V1_RNHplus-2_Hepa.normalized.bw
+V1_RNHplus-2_L_normalized.bw
+
+V1_Input-1_Hepa_normalized
+V1_Input-1_L.normalized
+V1_Input-2_Hepa.normalized
+V1_Input-2_L.normalized
+V1_RNH--1_Hepa.normalized
+V1_RNH--1_L.normalized
+V1_RNH--2_Hepa.normalized
+V1_RNH--2_L.normalized
+V1_RNHplus-1_Hepa_normalized
+V1_RNHplus-1_L_normalized
+V1_RNHplus-2_Hepa.normalized
+V1_RNHplus-2_L_normalized
+
+
+cat sample_names.txt | xargs -I % computeMatrix scale-regions -R mm10_gencodevm23.6cols.bed -S bigwigs/%.bw --outFileName deeptools/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+
+cat sample_names.txt | xargs -I % computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S bigwigs/%.bw --outFileName deeptools/tss/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+
+computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S gc_skew.mm10.bw --outFileName deeptools/tss/gc_skew.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S at_skew.mm10.bw --outFileName deeptools/tss/at_skew.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+
+computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S DRIP_Seq.bw --outFileName deeptools/tss/e14_drip.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+
+computeMatrix scale-regions -R mm10_gencodevm23.6cols.bed -S DRIP_Seq.bw --outFileName deeptools/metagene/e14.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+
+Peak calling on hepa and liver samples:
+
+First merge bam files for Input and Ips
+
+Sample	Hi Seq Name
+Liver Input (1)	    V1_Input 1_L
+Liver RnaseH+ (1)	V1_RNH+ 1_L
+Liver (1)	        V1_RNH- 1_L
+Liver Input (2)	    V1_Input 2_L
+Liver RnaseH+ (2)	V1_RNH+ 2_L
+Liver (2)	        V1_RNH- 2_L
+Hepa1-6 input (1)	V1_Input 1_Hepa
+Hepa1-6 RnaseH+ (1)	V1_RNH+ 1_Hepa
+Hepa1-6 (2)	        V1_RNH- 1_Hepa
+Hepa1-6 input (2)	V1_Input 2_Hepa
+Hepa1-6 RnaseH+ (2)	V1_RNH+ 2_Hepa
+Hepa1-6 (2)	        V1_RNH- 2_Hepa
+
+These are bam files from Aranyak, deduplicated using piccard 
+
+Then call peaks on the merged bam files:
+
+samtools merge merged/liver_IN_merged.bam V1_Input-1_L.rmdup.bam V1_Input-2_L.alignment.rmdup.bam
+samtools merge merged/liver_IP_merged.bam V1_RNH--1_L_alignment.rmdup.bam V1_RNH--2_L.alignment.sorted.rmdup.bam
+#(note: on genome browser view repeats are quite different and one file has worse enrichment than other)
+samtools merge merged/liver_RH_merged.bam V1_RNHplus-1_L_alignment.sorted.rmdup.bam V1_RNHplus-2_L_alignment.sorted.rmdup.bam
+samtools merge merged/hepa_IN_merged.bam V1_Input-2_Hepa_alignment.sorted.rmdup.bam V1_Input-1_Hepa.alignment.sorted.rmdup.bam
+samtools merge merged/hepa_IP_merged.bam V1_RNH--1_Hepa_alignment.sorted.rmdup.bam V1_RNH--2_Hepa.alignment.rmdup.bam
+samtools merge merged/hepa_RH_merged.bam V1_RNHplus-1_Hepa.alignment.sorted.rmdup.bam V1_RNHplus-2_Hepa.alignment.sorted.rmdup.bam
+
+
+#conda activate py27 #first to be able to run macs2
+
+macs2 callpeak --broad -g mm -f BAMPE -c merged/liver_IN_merged.bam -t merged/liver_IP_merged.bam --outdir ./liver_peak_calls -n liver_merged_IP_vs_IN 2> ./liver_merged_IP_vs_IN_broadpeaks.log
+macs2 callpeak --broad -g mm -f BAMPE -c merged/hepa_IN_merged.bam -t merged/hepa_IP_merged.bam --outdir ./hepa_peak_calls -n hepa_merged_IP_vs_IN 2> ./hepa_merged_IP_vs_IN_broadpeaks.log
+
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4,$5,$6)}' hepa_merged_IP_vs_IN_peaks.broadPeak > hepa_peaks.bed
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4,$5,$6)}' liver_merged_IP_vs_IN_peaks.broadPeak > liver_peaks.bed
+
+ABout 28,000 peaks in hepa
+About 14,000 in liver
+Called peaks look reasonable on genome browser
+
+Now overlap peaks with mm10 genes to get those that are + or - stranded and also genic vs intergenic
+
+-Can also later do expressed vs non-expressed
+
+First do a stranded slop on full genes file - to include 3kb upstream of TSS and 3Kb downstream of TES. And define these as genic regions
+-Pasero manuscript do +/-3kb from gene is TSS and TES/TTS, so have this as my gene boundaries.
+
+bedtools slop -i mm10_gencodevm23.6cols.bed -g mm10.chrom.sizes -b 3000 > mm10_3kb_slop_genes.bed
+
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/peak_calling/hepa_peak_calls/hepa_peaks.bed -b mm10_3kb_slop_genes.bed > hepa_peaks_slop_3kb_full_genes.tsv
+
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/peak_calling/liver_peak_calls/liver_peaks.bed -b mm10_3kb_slop_genes.bed > liver_peaks_slop_3kb_full_genes.tsv
+
+Aggregate signal around DRIP-seq peaks
+#Do skew as well
+cat sample_names2.txt | xargs -I % computeMatrix scale-regions -R hepa_annotated_peaks.bed -S bigwigs/%.bw --outFileName deeptools/hepa_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat sample_names2.txt | xargs -I % computeMatrix scale-regions -R liver_annotated_peaks.bed -S bigwigs/%.bw --outFileName deeptools/liver_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat sample_names2.txt | xargs -I % computeMatrix reference-point -R hepa_annotated_peaks.bed -S bigwigs/%.bw --outFileName deeptools/hepa_center/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint center
+cat sample_names2.txt | xargs -I % computeMatrix reference-point -R liver_annotated_peaks.bed -S bigwigs/%.bw --outFileName deeptools/liver_center/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint center
+
+cat skew_names.txt | xargs -I % computeMatrix scale-regions -R hepa_annotated_peaks.bed -S %.bw --outFileName deeptools/hepa_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat skew_names.txt | xargs -I % computeMatrix scale-regions -R liver_annotated_peaks.bed -S %.bw --outFileName deeptools/liver_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat skew_names.txt | xargs -I % computeMatrix scale-regions -R e14_annotated_peaks.bed -S %.bw --outFileName deeptools/e14_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat skew_names.txt | xargs -I % computeMatrix scale-regions -R t3_annotated_peaks.bed -S %.bw --outFileName deeptools/3t3_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+
+computeMatrix scale-regions -R e14_annotated_peaks.bed -S DRIP_Seq.bw --outFileName deeptools/e14_scale.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+
+
+bedtools intersect -wo -b /Volumes/Pegasus/puzzo_drip_seq/hepa_annotated_peaks.bed -a /Volumes/Pegasus/puzzo_drip_seq/liver_annotated_peaks.bed > intersect_keep_liver.tsv
+bedtools intersect -wo -a /Volumes/Pegasus/puzzo_drip_seq/hepa_annotated_peaks.bed -b /Volumes/Pegasus/puzzo_drip_seq/liver_annotated_peaks.bed > intersect_keep_hepa.tsv
+
+
+
+#Skew over TSS
+computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S gc_skew.mm10.bw --outFileName deeptools/tss/gc_skew.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S at_skew.mm10.bw --outFileName deeptools/tss/at_skew.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+
+
+Get nucleotide content over peaks
+bedtools nuc -fi /Volumes/Pegasus/cytoDRIP2_SETX/shiran_hush/mm10_skew/mm10.fa -bed hepa_annotated_peaks.bed   > hepa_annotated_peaks.bed.nuc_content.txt
+bedtools nuc -fi /Volumes/Pegasus/cytoDRIP2_SETX/shiran_hush/mm10_skew/mm10.fa -bed liver_annotated_peaks.bed  > liver_annotated_peaks.bed.nuc_content.txt
+bedtools nuc -fi /Volumes/Pegasus/cytoDRIP2_SETX/shiran_hush/mm10_skew/mm10.fa -bed e14_annotated_peaks.bed > e14_annotated_peaks.bed.nuc_content.txt
+bedtools nuc -fi /Volumes/Pegasus/cytoDRIP2_SETX/shiran_hush/mm10_skew/mm10.fa -bed t3_annotated_peaks.bed  > t3_annotated_peaks.bed.nuc_content.txt
+
+bedtools nuc -fi /Users/cimprich/Genomics/indexes/hg38/hg38_noalt.fa -bed qdrip_shuffle_combined.bed > qdrip_shuffle_combined.nuc_content.txt
+
+# As comparison, use Chedin mouse DRIP-seq peaks:
+
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE70189
+-3T3 and E14. From Shiran, have E14 DRIP-seq that Tomek has aligned.
+
+-These peaks are in mm9, so liftover to mm10
+-Use UCSC liftover interface.
+-Now annotate, as above:
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/E14_chedin.mm10.bed -b mm10_3kb_slop_genes.bed > e14_peaks_slop_3kb_full_genes.tsv
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/3T3_chedin.mm10.bed -b mm10_3kb_slop_genes.bed > 3t3_peaks_slop_3kb_full_genes.tsv
+
+        The following information will be reported after each BED entry:
+            1) %AT content
+            2) %GC content
+            3) Number of As observed
+            4) Number of Cs observed
+            5) Number of Gs observed
+            6) Number of Ts observed
+            7) Number of Ns observed
+            8) Number of other bases observed
+            9) The length of the explored sequence/interval.
+            10) The seq. extracted from the FASTA file. (opt., if -seq is used)
+            11) The number of times a user's pattern was observed.
+                (opt., if -pattern is used.)
+
+Now parse in terms of expressed or non-expressed genes
+
+-Peak lengths (histogram)
+-Gene lengths (bar plot: short, medium, long)
+-Nucleotide properties (nucleotide content)
+-Venn diagram of overlap liver and hepa1-6
+
+-CEAS (peak annotations)
+-Skew plot (over peaks)
+-aggregate plot (over drip peaks, can do over each others peaks hepa and liver, scale and peak center, active vs inactive)
+ metagene plot (active vs inactive)
+ tss plot (active vs inactive)
+
+-GO, GSEA
+
+Try and re-do DRIP-seq bigwigs from bam files as the deeptools plots look weird.
+
+cat files_names_redo.txt
+V1_Input-1_Hepa.alignment.sorted.rmdup.bam
+V1_Input-2_Hepa_alignment.sorted.rmdup.bam
+V1_RNH--1_Hepa_alignment.sorted.rmdup.bam
+V1_RNH--2_Hepa.alignment.rmdup.bam
+V1_RNHplus-1_Hepa.alignment.sorted.rmdup.bam
+V1_RNHplus-2_Hepa.alignment.sorted.rmdup.bam
+
+first do samtools sort -n e.g. 
+
+samtools sort -n {}.bam > sorted.bam
+
+-Mistake I think is didn't make bedpe files first, so weren't using read fragments.
+
+New code (Mine)
+cat files_names_redo.txt | sed 's/\.bam//' | xargs -I {} -P10 sh -c 'bedtools bamtobed -bedpe -i {}.bam > {}.bedpe'
+find *.bedpe | sed 's/\.bedpe//' | xargs -I {} -c 'cut -f 1,2,6 {}.bedpe > {}.bed'
+find *.bed | sed 's/\.bed//' | xargs -I {} -P10 sh -c 'gsort --parallel=8 -u -k1,1 -k2,2n -k3,3n {}.bed > {}.sorted.bed'
+find *.sorted.bed | sed 's/\.sorted.bed//' | xargs -I {} -P10 sh -c 'bedtools genomecov -bg -g mm10.chrom.sizes -i {}.sorted.bed > {}.bedGraph'
+
+wc -l *.bed > read_count.txt
+
+9069956	V1_Input-1_Hepa.sorted.bed	9.069956
+8979683	V1_Input-1_L.sorted.bed	8.979683
+7755421	V1_Input-2_Hepa.sorted.bed	7.755421
+11282307	V1_Input-2_L.sorted.bed	11.282307
+14300068	V1_RNH--1_Hepa.sorted.bed	14.300068
+14098233	V1_RNH--1_L.sorted.bed	14.098233
+26153489	V1_RNH--2_Hepa.sorted.bed	26.153489
+26129303	V1_RNH--2_L.sorted.bed	26.129303
+12217100	V1_RNHplus-1_Hepa.sorted.bed	12.2171
+8979683	V1_RNHplus-1_L.sorted.bed	8.979683
+20554130	V1_RNHplus-2_Hepa.sorted.bed	20.55413
+12257706	V1_RNHplus-2_L.sorted.bed	12.257706
+
+#Normalize to RPM
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/9.069956)}' V1_Input-1_Hepa.bedGraph > V1_Input-1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/8.979683)}' V1_Input-1_L.bedGraph > V1_Input-1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/7.755421)}' V1_Input-2_Hepa.bedGraph > V1_Input-2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/11.282307)}' V1_Input-2_L.bedGraph > V1_Input-2_L.bedGraph.norm
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/14.300068)}' V1_RNH--1_Hepa.bedGraph > V1_RNH--1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/14.098233)}' V1_RNH--1_L.bedGraph > V1_RNH--1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/26.153489)}' V1_RNH--2_Hepa.bedGraph > V1_RNH--2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/26.129303)}' V1_RNH--2_L.bedGraph > V1_RNH--2_L.bedGraph.norm
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/12.2171)}' V1_RNHplus-1_Hepa.bedGraph > V1_RNHplus-1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/8.979683)}' V1_RNHplus-1_L.bedGraph > V1_RNHplus-1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/20.55413)}' V1_RNHplus-2_Hepa.bedGraph > V1_RNHplus-2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/12.257706)}' V1_RNHplus-2_L.bedGraph > V1_RNHplus-2_L.bedGraph.norm
+
+find *.norm | sed 's/\.bedGraph.norm//' | xargs -I {} -P 10 /Volumes/Pegasus/shared_files/util/bedGraphToBigWig {}.bedGraph.norm ../mm10.chrom.sizes {}.bw
+
+Now re-do deeptools:
+
+mkdir genes_scale tss_re hepa_scale_re liver_scale_re hepa_center_re liver_center_re
+
+cat sample_names.txt | xargs -I % computeMatrix scale-regions -R mm10_gencodevm23.6cols.bed -S bigwigs_re/%.bw --outFileName deeptools/genes_scale/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat sample_names.txt | xargs -I % computeMatrix reference-point -R mm10_gencodevm23.6cols.bed -S bigwigs_re/%.bw --outFileName deeptools/tss_re/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint TSS
+
+cat sample_names2.txt | xargs -I % computeMatrix scale-regions -R hepa_annotated_peaks.bed -S bigwigs_re/%.bw --outFileName deeptools/hepa_scale_re/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat sample_names2.txt | xargs -I % computeMatrix scale-regions -R liver_annotated_peaks.bed -S bigwigs_re/%.bw --outFileName deeptools/liver_scale_re/%.matrix -m 2000 -bs 10 -a 2000 -b 2000 -p 8
+cat sample_names2.txt | xargs -I % computeMatrix reference-point -R hepa_annotated_peaks.bed -S bigwigs_re/%.bw --outFileName deeptools/hepa_center_re/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint center
+cat sample_names2.txt | xargs -I % computeMatrix reference-point -R liver_annotated_peaks.bed -S bigwigs_re/%.bw --outFileName deeptools/liver_center_re/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint center
+
+
+
+###Still see artifact there - many regions that have very sharp signal that doesn't look like a real peak
+-Try to exclude these sites from mouse blacklist file. Download from website (originally from encode)
+
+-Intersect the Hepa and liver peaks to only include those not in blacklist
+
+bedtools intersect -v -a hepa_annotated_peaks.bed -b mm10-blacklist.v2.bed > hepa_annotated_peaks_ohne_blacklist.bed
+bedtools intersect -v -a liver_annotated_peaks.bed -b mm10-blacklist.v2.bed > liver_annotated_peaks_ohne_blacklist.bed
+
+-Some 1000 peaks gone, but still see artifact
+
+-The artifact is still there on peaks that are removed from blacklist
+
+-Other things to try:
+a)Filter out the bottom third of peaks, and see if still see that feature in rest of the peaks - first
+b)Deeptools plot, try higher bin size to smooth out - second
+c)Make bigwigs with bigger bin size (not 1, but 10, 20 etc can use deeptools bamcoverage) - fourth
+d)Filter peaks to those with higher p-value and only use a subset - third and re-do deeptools matrices on new peaks
+e)Re-align from fastq and take reads with higher mappability
+f)Also re-align Chedin mouse files and see if his mouse bigwigs are different around my DRIP peaks. If same, then is something in mouse genome.
+g) Deeptools using chedin peaks and hepa signal, see if something about the signal or the regions.
+h) Filter out low mapq reads, re-make bigwigs and re-do peak calling
+
+
+b) Have done deeptools with my bigwigs and drip peaks with bin size of 20, 50 and 100. The 100 bin size smooths out the artifact, 20 and 50 not.
+
+75 bin size is good
+
+h) Ask Mike - he uses 10 as value to remove low mapping quality reads
+
+samtools view -q 10 -bh in.bam > out.bam 
+-Do this for all bam files from Aranyak
+
+-Now merge the bam files
+
+samtools merge -o merged_mapq/liver_IN_merged.mapq.bam V1_Input-1_L.mapq.bam V1_Input-2_L.mapq.bam
+
+(do for all mapq filtered bam files IN and IPs)
+
+#conda activate py27 #first to be able to run macs2
+
+macs2 callpeak --broad -g mm -f BAMPE -c merged/liver_IN_merged.bam -t merged/liver_IP_merged.bam --outdir ./liver_peak_calls -n liver_merged_IP_vs_IN 2> ./liver_merged_IP_vs_IN_broadpeaks.log
+macs2 callpeak --broad -g mm -f BAMPE -c merged/hepa_IN_merged.bam -t merged/hepa_IP_merged.bam --outdir ./hepa_peak_calls -n hepa_merged_IP_vs_IN 2> ./hepa_merged_IP_vs_IN_broadpeaks.log
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4,$5,$6)}' hepa_merged_IP_vs_IN_peaks.broadPeak > hepa_peaks.bed
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4,$5,$6)}' liver_merged_IP_vs_IN_peaks.broadPeak > liver_peaks.bed
+
+ABout 28,000 peaks in hepa
+About 14,000 in liver
+Called peaks look reasonable on genome browser
+
+bedtools intersect -v -a hepa_annotated_peaks.mapq.bed -b mm10-blacklist.v2.bed > hepa_annotated_peaks_ohne_blacklist.mapq.bed
+bedtools intersect -v -a liver_annotated_peaks.mapq.bed -b mm10-blacklist.v2.bed > liver_annotated_peaks_ohne_blacklist.mapq.bed
+
+-From the filtered bam files, re-do bigwigs:
+
+ls -1 *bam | sed 's/\.mapq.bam//' | xargs -I {} -P10 sh -c 'samtools sort -n {}.mapq.bam > {}.mapq.sorted.bam
+cat files_names_redo.txt | sed 's/\mapq.sorted.bam//' | xargs -I {} -P10 sh -c 'bedtools bamtobed -bedpe -i {}.mapq.sorted.bam > {}.bedpe'
+find *.bedpe | sed 's/\.bedpe//' | xargs -I {} -c 'cut -f 1,2,6 {}.bedpe > {}.bed'
+find *.bed | sed 's/\.bed//' | xargs -I {} -P10 sh -c 'gsort --parallel=8 -u -k1,1 -k2,2n -k3,3n {}.bed > {}.sorted.bed'
+find *.sorted.bed | sed 's/\.sorted.bed//' | xargs -I {} -P10 sh -c 'bedtools genomecov -bg -g mm10.chrom.sizes -i {}.sorted.bed > {}.bedGraph'
+wc -l *.bed > read_count.txt
+
+V1_Input-1_Hepa.sorted.bed	8.121239
+V1_Input-1_L.sorted.bed	7.891007
+V1_Input-2_Hepa.sorted.bed	6.928274
+V1_Input-2_L.sorted.bed	9.89903
+V1_RNH--1_Hepa.sorted.bed	12.969822
+V1_RNH--1_L.sorted.bed	11.577689
+V1_RNH--2_Hepa.sorted.bed	23.588974
+V1_RNH--2_L.sorted.bed	23.577466
+V1_RNHplus-1_Hepa.sorted.bed	10.73297
+V1_RNHplus-1_L.sorted.bed	7.891007
+V1_RNHplus-2_Hepa.sorted.bed	18.329995
+V1_RNHplus-2_L.sorted.bed	10.628083
+
+#Normalize to RPM
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/8.121239)}' V1_Input-1_Hepa.bedGraph > V1_Input-1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/7.891007)}' V1_Input-1_L.bedGraph > V1_Input-1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/6.928274)}' V1_Input-2_Hepa.bedGraph > V1_Input-2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/9.89903)}' V1_Input-2_L.bedGraph > V1_Input-2_L.bedGraph.norm
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/12.969822)}' V1_RNH--1_Hepa.bedGraph > V1_RNH--1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/11.577689)}' V1_RNH--1_L.bedGraph > V1_RNH--1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/23.588974)}' V1_RNH--2_Hepa.bedGraph > V1_RNH--2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/23.577466)}' V1_RNH--2_L.bedGraph > V1_RNH--2_L.bedGraph.norm
+
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/10.73297)}' V1_RNHplus-1_Hepa.bedGraph > V1_RNHplus-1_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/7.891007)}' V1_RNHplus-1_L.bedGraph > V1_RNHplus-1_L.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/18.329995)}' V1_RNHplus-2_Hepa.bedGraph > V1_RNHplus-2_Hepa.bedGraph.norm
+awk 'BEGIN{OFS="\t"}{print($1,$2,$3,$4/10.628083)}' V1_RNHplus-2_L.bedGraph > V1_RNHplus-2_L.bedGraph.norm
+
+#find *.norm | sed 's/\.bedGraph.norm//' | xargs -I {} -P 10 /Volumes/Pegasus/shared_files/util/bedGraphToBigWig {}.bedGraph.norm ../mm10.chrom.sizes {}.bw
+
+
+
+
+
+Find following dataset from Albino in MD Andersson
+
+https://ncifrederick.cancer.gov/bids/ftp/?nonb
+
+Have a database of predicted non-B-form DNA structures
+
+-download gz file, double click in finder to extract and also extract tarball
+
+-Get folder with type of secondary structure separated for each chromosomes
+
+-Copy over folder to server
+
+-All are gff or tsv files (12 col) with chromosome for each structure type
+
+-Use TSV files with following header
+Sequence_name	Source	Type	Start	Stop	Length	Score	Strand	Repeat	Spacer	Permutations	Subset	Composition	Sequence
+chr10	ABCC	Mirror_Repeat	3001161	3001183	23	NA	+	11	1	1	1	9A/1C/0G/1T	taaaaaacaaacaaacaaaaaat
+Structure classes are:
+
+APR - a phased repeat
+DR - direct repeat
+GQ - G-quad
+IR - inverted repeat
+MR - mirror repeat
+STR - short tandem repeat
+Z - Z DNA
+
+-Cat files from each chromosome for each structure type:
+-remove chrMT for each type (only a couple, but may skew things)
+e.g.
+rm chrMT_Z.tsv 
+-Then combine
+
+cat *Z* | grep -v 'Sequence_name' > Z.tsv
+cat *APR* | grep -v 'Sequence_name' > APR.tsv
+cat *GQ* | grep -v 'Sequence_name' > GQ.tsv
+cat *IR* | grep -v 'Sequence_name' > IR.tsv
+cat *MR* | grep -v 'Sequence_name' > MR.tsv
+cat *STR* | grep -v 'Sequence_name' > STR.tsv
+cat *DR* | grep -v 'Sequence_name' > DR.tsv
+
+
+1)Get bed files of each structure:
+2)Then add column with 1
+3)Convert to bigwig
+4)Deeptools gene metaplot and around peak centers (try peak centers 1st)
+
+1) cat nonbdna_types.txt | xargs -I {} -P6 sh -c 'cut -f 1,4,5 {}.tsv | sort -k1,1 -k2,2n -k3,3n > {}.bed'
+
+2)
+cat APR.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > APR.4col.bed
+cat DR.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > DR.4col.bed
+cat GQ.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > GQ.4col.bed
+cat IR.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > IR.4col.bed
+cat MR.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > MR.4col.bed
+cat STR.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > STR.4col.bed
+cat Z.bed | awk '{ print $1 "\t" $2 "\t" $3 "\t1"}' > Z.4col.bed
+
+Download mm9 chrom.sizes
+
+wget --timestamping \
+        'ftp://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.chrom.sizes' \
+        -O mm9.chrom.sizes
+
+3) bedtools genomecov -bg -g mm9.chrom.sizes -i line.4col.bed > line.bedGraph
+
+ls -1 *4col.bed | sed 's/.4col.bed//' | xargs -I {} -P6 sh -c 'bedtools genomecov -bg -g mm9.chrom.sizes -i {}.4col.bed > {}.bedGraph'
+ls -1 *4col.bed | sed 's/.4col.bed//' | xargs -I {} -P6 sh -c  '/Volumes/Pegasus/shared_files/util/bedGraphToBigWig {}.bedGraph mm9.chrom.sizes {}.bw'
+
+4) Get control DRIP regions - in same genes as DRIP peaks (i.e. expression matched)
+
+-Get DRIP peaks and slop 3000 to make sure any other peaks will be at least 3kb away
+-Then intersect these with genes that contain a DRIP peak
+-Then do random shuffle from within these genes excluding the slopped peaks
+-Use LO to get these to mm9 (repeat bigwigs are in mm9)
+
+bedtools slop -i hepa_peaks.mm9.bed -g mm9.chrom.sizes -b 3000 > hepa_peaks_slop_3kb.mm9.bed
+bedtools slop -i liver_peaks.mm9.bed -g mm9.chrom.sizes -b 3000 > liver_peaks_slop_3kb.mm9.bed
+
+bedtools slop -i 3T3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes -b 3000 > t3_peaks_slop_3kb.mm9.bed
+bedtools slop -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes -b 3000 > e14_peaks_slop_3kb.mm9.bed
+
+where -g is mm9 chrom sizes
+Need to download:
+
+wget 'ftp://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.chrom.sizes' -O mm9.chrom.sizes
+mv 'mm9 (1).fa.gz' /Users/madziacrossley/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+
+bedtools shuffle -incl mm9_genes_6col.bed -excl hepa_peaks_slop_3kb.mm9.bed -i hepa_peaks.mm9.bed -g mm9.chrom.sizes > hepa_peaks_shuffle.1.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl hepa_peaks_slop_3kb.mm9.bed -i hepa_peaks.mm9.bed -g mm9.chrom.sizes > hepa_peaks_shuffle.2.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl hepa_peaks_slop_3kb.mm9.bed -i hepa_peaks.mm9.bed -g mm9.chrom.sizes > hepa_peaks_shuffle.3.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl hepa_peaks_slop_3kb.mm9.bed -i hepa_peaks.mm9.bed -g mm9.chrom.sizes > hepa_peaks_shuffle.4.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl hepa_peaks_slop_3kb.mm9.bed -i hepa_peaks.mm9.bed -g mm9.chrom.sizes > hepa_peaks_shuffle.5.bed
+
+bedtools shuffle -incl mm9_genes_6col.bed -excl liver_peaks_slop_3kb.mm9.bed -i liver_peaks.mm9.bed -g mm9.chrom.sizes > liver_peaks_shuffle.1.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl liver_peaks_slop_3kb.mm9.bed -i liver_peaks.mm9.bed -g mm9.chrom.sizes > liver_peaks_shuffle.2.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl liver_peaks_slop_3kb.mm9.bed -i liver_peaks.mm9.bed -g mm9.chrom.sizes > liver_peaks_shuffle.3.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl liver_peaks_slop_3kb.mm9.bed -i liver_peaks.mm9.bed -g mm9.chrom.sizes > liver_peaks_shuffle.4.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl liver_peaks_slop_3kb.mm9.bed -i liver_peaks.mm9.bed -g mm9.chrom.sizes > liver_peaks_shuffle.5.bed
+
+
+bedtools shuffle -incl mm9_genes_6col.bed -excl e14_peaks_slop_3kb.mm9.bed -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > e14_peaks_shuffle.1.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl e14_peaks_slop_3kb.mm9.bed -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > e14_peaks_shuffle.2.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl e14_peaks_slop_3kb.mm9.bed -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > e14_peaks_shuffle.3.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl e14_peaks_slop_3kb.mm9.bed -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > e14_peaks_shuffle.4.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl e14_peaks_slop_3kb.mm9.bed -i E14_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > e14_peaks_shuffle.5.bed
+
+bedtools shuffle -incl mm9_genes_6col.bed -excl t3_peaks_slop_3kb.mm9.bed -i t3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > t3_peaks_shuffle.1.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl t3_peaks_slop_3kb.mm9.bed -i t3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > t3_peaks_shuffle.2.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl t3_peaks_slop_3kb.mm9.bed -i t3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > t3_peaks_shuffle.3.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl t3_peaks_slop_3kb.mm9.bed -i t3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > t3_peaks_shuffle.4.bed
+bedtools shuffle -incl mm9_genes_6col.bed -excl t3_peaks_slop_3kb.mm9.bed -i t3_DRIP_peaks.mm9.bed -g mm9.chrom.sizes > t3_peaks_shuffle.5.bed
+
+
+5) Now run in deeptools
+
+cat sample_names2.txt | xargs -I % computeMatrix reference-point -R liver_annotated_peaks.bed -S bigwigs_re/%.bw --outFileName deeptools/liver_center_re/%.matrix -bs 10 -a 5000 -b 5000 -p 8 --referencePoint center
+
+
+
+#Get new set of genes from RNA-seq data Aranyak. These are gencode v25 and different ensembl gene_IDs. 
+
+#Repeat tss and tes and metagene plots over these genes
+
+#Also try re-annotating peak files with these gene strands and re-doing aggregate plots of hepa and liver drip-seq over their peaks.
+
+rna_seq_genes.6col.bed
+
+bedtools slop -i rna_seq_genes.6col.bed -g mm10.chrom.sizes -b 3000 > mm10_3kb_slop_genes_rnaseq.bed
+
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/peak_calling/hepa_peak_calls/hepa_peaks.bed -b mm10_3kb_slop_genes.bed > hepa_peaks_slop_3kb_full_genes.tsv
+
+bedtools intersect -wao -a /Volumes/Pegasus/puzzo_drip_seq/peak_calling/liver_peak_calls/liver_peaks.bed -b mm10_3kb_slop_genes.bed > liver_peaks_slop_3kb_full_genes.tsv
+
+
+###Get DRIP-seq coverage over RNA-seq genes so can then correlate with RNA-seq fpkm values
+
+bedtools map -c 4 -o mean -a rna_seq_genes.6col.bed -b /Volumes/Pegasus/cytoDRIP2_SETX/normalized_files/m_SETX_1_S9p6.bam.bedGraph.norm > cytoDRIP_1.m.cov
+
+bedtools coverage -sorted -counts -a rna_seq_genes.6col.bed -b qdrip_reads.bed qdrip_new_reads.bed drip_seq_reads.bed rh_reads.bed rh_all_reads.bed rdip_reads.bed rdip_rh_reads.bed > peak_calling/prelim_calls/coverage/%.cov
+
+
+### Aranyak's gene annotations seem wrong. They don't have any DRIP signal enrichment whereas my version v25 gencode mm10 from UCSC do.
+
+My file: mm10_v25.6col.bed works well and has ~62k genes
+
+GRCm38.gtf              (This is file Aranyak uses for RNA-seq)                                                  
+
+##description: evidence-based annotation of the mouse genome (GRCm38), version M25 (Ensembl 100)
+##provider: GENCODE
+##contact: gencode-help@ebi.ac.uk
+##format: gtf
+##date: 2020-03-24
+chr1	HAVANA	gene	3073253	3074322	.	+	.	gene_id "ENSMUSG00000102693.1"; gene_type "TEC"; gene_name "4933401J01Rik"; level 2; mgi_id "MGI:1918292"; havana_gene "OTTMUSG00000049935.1";
+chr1	HAVANA	transcript	3073253	3074322	.	+	.	gene_id "ENSMUSG00000102693.1"; transcript_id "ENSMUST00000193812.1"; gene_type "TEC"; gene_name "4933401J01Rik"; transcript_type "TEC"; transcript_name "4933401J01Rik-201"; level 2; transcript_support_level "NA"; mgi_id "MGI:1918292"; tag "basic"; havana_gene "OTTMUSG00000049935.1"; havana_transcript "OTTMUST00000127109.1";
+chr1	HAVANA	exon	3073253	3074322	.	+	.	gene_id "ENSMUSG00000102693.1"; transcript_id "ENSMUST00000193812.1"; gene_type "TEC"; gene_name "4933401J01Rik"; transcript_type "TEC"; transcript_name "4933401J01Rik-201"; exon_number 1; exon_id "ENSMUSE00001343744.1"; level 2; transcript_support_level "NA"; mgi_id "MGI:1918292"; tag "basic"; havana_gene "OTTMUSG00000049935.1"; havana_transcript "OTTMUST00000127109.1";
+chr1	ENSEMBL	gene	3102016	3102125	.	+	.	gene_id "ENSMUSG00000064842.1"; gene_type "snRNA"; gene_name "Gm26206"; level 3; mgi_id "MGI:5455983";
+chr1	ENSEMBL	transcript	3102016	3102125	.	+	.	gene_id "ENSMUSG00000064842.1"; transcript_id "ENSMUST00000082908.1"; gene_type "snRNA"; gene_name "Gm26206"; transcript_type "snRNA"; transcript_name "Gm26206-201"; level 3; transcript_support_level "NA"; mgi_id "MGI:5455983"; tag "basic";
+
+-So versions are the same, but he has ~52k columns, my bed file has ~62k columns
+-Perhaps his is exon start/end site, but is clearly not the trxn start/end site.
+
+
+###Solution is to try and me do the RNA-seq analysis, at least can do the basic stuff using my gene annotation bed file
+
+This VIPER program needs gtf files
+Download and compare gene files (as gtf) from GENCODE https://www.gencodegenes.org/mouse/release_M25.html and UCSC table browser
+Compare with file from Aranyak GRCm38.gtf 
+See that his file is gencode.vM25.chr_patch_hapl_scaff.annotation.gtf 
+Problem is, cannot get bed files from GENCODE, and need the bed files to plot the DRIP-seq
+So in order to be consistent with gene naming etc, get the gtf from UCSC for v25 comprehensive (also have basic) and use this in RNA-seq
+Can then use the same bed file for DRIP-seq
+
+From UCSC download the gtf files for RNA_seq and the corresponding bed files for DRIP-seq analysis:
+
+/Users/madziacrossley/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/gtf_genes/ucsc
+
+mm10_gencodev25.basic.bed
+mm10_gencodev25.comp.bed      
+mm10_gencodev25.basic.gtf
+mm10_gencodev25.comp.gtf
+
+##Download the RNA-seq fastq files
+
+#!/usr/bin/bash
+#SBATCH --job-name=fasterq_dump
+#SBATCH --output=rna_seq_fastq.out
+#SBATCH --error=rna_seq_fastq.err
+#SBATCH --time=6:00:00
+#SBATCH -p normal
+#SBATCH -c 1
+
+
+module load biology sra-tools
+
+fasterq-dump --split-files SRR18287794 SRR18287795 SRR18287799 #paired-end HEPA
+fasterq-dump SRR24293558 SRR24293559 SRR24293560 #single-end liver
+
+
+SRAs for RNA-seq:
+
+Hepa Mus musculus; RNA-Seq (3 replicates):
+
+ https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR18287794&display=metadata
+https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR18287795&display=metadata
+https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR18287799&display=metadata
+
+SRR18287794
+SRR18287795
+SRR18287799
+
+https://www.ncbi.nlm.nih.gov/sra/?term=GSM5939572
+
+Single-end
+Liver B6 (3 replicates):
+SRX20088938: GSM7224821: B6_PBS Sample 16; Mus musculus; RNA-Seq, SRR24293558
+SRX20088937: GSM7224820: B6_PBS Sample 15; Mus musculus; RNA-Seq, SRR24293559
+SRX20088936: GSM7224819: B6_PBS Sample 14; Mus musculus; RNA-Seq, SRR24293560
+
+https://www.ncbi.nlm.nih.gov/sra/?term=SRR24293558
+
+#Use VIPER pipeline
+https://github.com/hanfeisun/viper-rnaseq/blob/master/README.md
+
+Follow the steps on READme.
+
+Use the wget option:
+
+wget https://bitbucket.org/cfce/viper/get/master.tar.gz
+tar -xf master.tar.gz
+rm master.tar.gz
+mv cfce-viper-15252700ca79/ viper
+
+To run conda environment for viper:
+conda activate ENVIRONMENT
+
+Then switch to this readme file which is more helpful:
+
+https://bitbucket.org/cfce/viper/src/master/README.md
+
+mkdir VIPER_static
+        mkdir mm10
+wget https://www.dropbox.com/sh/8cqooj05i7rnyou/AAA6Ps9gUJa82rc-14mXNBFna/mm10.tar.gz?dl=0
+(download all these reference files)
+when done get this message: 2023-11-17 14:10:43 (52.7 MB/s) - ‘mm10.tar.gz?dl=0.1’ saved [104011921221/104011921221]
+
+tar -xzf mm10.tar.gz?dl=0.1
+
+#!/usr/bin/bash
+#SBATCH --job-name=tar
+#SBATCH --output=tar.out
+#SBATCH --error=tar.err
+#SBATCH --time=6:00:00
+#SBATCH -p normal
+#SBATCH -c 1
+
+tar -xzf mm10.tar.gz?dl=0.1
+
+sbatch viper.sh
+ln -s /path/to/VIPER_static ./ref_files
+
+cd PROJECT
+ln -s /some/path/to/my/data/ ./data
+(link to fastq files)
+
+then 
+
+conda deactivate
+
+
+###Jan2024 differential peak analysis
+
+Email chain from Francesco Puzzo
+
+Hi Madzia,
+ 
+I completely agree with you. I was thinking to add maybe a graph on these analysis,  put it in the supplementary and eventually speculate about it in the discussion.
+I believe that those “extra-rloops” in the HEPA might be in oncogenes or gene related to cell division/replication and the difference might be due to their different physiological state (transformed vs. non-transformed), but again I agree that we do not need to emphasize what we do not know.
+ 
+ 
+From: Madzia Crossley <mpcross@stanford.edu>
+Date: Friday, December 15, 2023 at 10:24 AM
+To: Francesco Puzzo <fpuzzo@stanford.edu>
+Subject: Re: R-loops paper DRAFT & Abstract of interest
+
+Hi Francesco
+ 
+1. Yes I plan to do this. So far I had a look and the R-loops only in HEPA look to have similar properties compared to liver, but I can include some figures. The problem is we need to say why there are more R-loops in HEPA vs liver and if we emphasize the difference we need to have some explanations. That is where the RNA-seq comes in. If I can say that the R-loops only in Hepa are due to differences in gene expression then that is straightforward. However, if liver actually has more genes up and higher expression but fewer R-loops mapped, then it could be a) differences in transformed cells b) technical - mapping R-loops from a tissue just gives you much lower enrichment due to fixation etc compared to a cell line. I am not sure we can really distinguish between a) and b) without say doing this comparison (cell line and tissue) with more samples (brain or whatever). But we can put these data in such a way so as to not emphasize what we don’t know, or expand on this in the discussion.
+ 
+2) I’ll take a look!
+ 
+Madzia
+ 
+On Dec 11, 2023, at 4:37 PM, Francesco Puzzo <fpuzzo@stanford.edu> wrote:
+ 
+Hi Madzia, 
+Two things I wanted to ask:
+Do you think we could have a map of the r-loops that are only present in HEPA1-6 vs.Liver (based in the figure below) that we can include in the paper or we need more time to do this analysis and in case add the data in the revision? 
+<image001[7].png>
+ 
+I saw this abstract (came out the end of November) presented at this year’s ASH (American society of hematology). What do you think about it?
+242-Genome-Wide Mapping of R-Loops in Single Cells Reveals Cell-Type Specific Roles for R-Loops in Hematopoietic Cell Identity
+https://ash.confex.com/ash/2023/webprogram/Paper180913.html
+
+
+##Do some basic comparison of DRIP peaks - hepa only peaks, liver only peaks, liver that overlap and hepa that overlap
+
+hepa_annotated_peaks.bed (all hepa)
+liver_annotated_peaks.bed (all liver)
+
+hepa_only
+liver_only
+hepa_overlapping
+liver_overlapping
+
+bedtools intersect -b hepa_annotated_peaks.bed -a liver_annotated_peaks.bed -v > liver_only_peaks.bed
+bedtools intersect -a hepa_annotated_peaks.bed -b liver_annotated_peaks.bed -v > hepa_only_peaks.bed
+bedtools intersect -wa -b hepa_annotated_peaks.bed -a liver_annotated_peaks.bed > liver_peaks_overlap_hepa.bed
+bedtools intersect -wa -a hepa_annotated_peaks.bed -b liver_annotated_peaks.bed > hepa_peaks_overlap_liver.bed
+
+#Nucleotide content of these peaks
+bedtools nuc -fi mm10.fa -bed liver_only_peaks.bed   > liver_only_peaks.bed.nuc_content.txt
+bedtools nuc -fi mm10.fa -bed hepa_only_peaks.bed  > hepa_only_peaks.bed.nuc_content.txt
+
+bedtools nuc -fi mm10.fa -bed liver_peaks_overlap_hepa.bed   > liver_peaks_overlap_hepa.bed.nuc_content.txt
+bedtools nuc -fi mm10.fa -bed hepa_peaks_overlap_liver.bed  > hepa_peaks_overlap_liver.bed.nuc_content.txt
+
+
+#Do CEAS of hepa only and liver only peaks
+
+cut -f 1,2,3 liver_only_peaks.bed > CEAS/liver_only_peaks.3cols.bed
+cut -f 1,2,3 hepa_only_peaks.bed > CEAS/hepa_only_peaks.3cols.bed
+
+
+RNA-seq
+https://www.ebi.ac.uk/gxa/FAQ.html
+In Baseline expression results, how are baseline expression levels represented?
+In Baseline expression results you will see one heatmap per species. Each heatmap shows, for each species, all conditions (columns) and all experiments (rows) that matched your search. Expression levels are displayed in the heatmap in five different colours:
+
+Grey box: expression level is below cutoff (0.5 FPKM or 0.5 TPM)
+Light blue box: expression level is low (between 0.5 to 10 FPKM or 0.5 to 10 TPM)
+Medium blue box: expression level is medium (between 11 to 1000 FPKM or 11 to 1000 TPM)
+Dark blue box: expression level is high (more than 1000 FPKM or more than 1000 TPM)
+White box: there is no data available
+
+
+bedtools intersect -wa -b grcm38.bed -a mm10_v25_basic.6col.bed > v25_intersect_grcm38.tsv
+#doesn't work - error reading in grcm38.bed
+
+bedtools intersect -wa -b rna_seq_genes.6col.bed -a mm10_v25_basic.6col.bed | gsort --parallel=8 -u -k1,1 -k2,2n -k3,3n > v25_intersect_rna-seq.tsv
+wc -l
+46831
+
+ 67377 mm10_v25_basic.6col.bed
+
+So most of my v25 genes overlap with Aranyak's annotated genes for RNA-seq. But there are ~90,000 total overlaps, so a lot of multiple genes from his rna-seq file overlap my genes.
+May not get a great one to one.
+
+In any case, will do TSS plot for DRIP-seq over mm10_v25_basic.6col.bed AND get mm10_v25_basic.6col.bed DRIP-seq coverage which can ten correlate with RNA-seq.
+
+Do bedtools annotate so can do coverage for multiple files at once. 
+
+bedtools annotate -counts -i mm10.v25_genes.6col.sorted.bed -files qdrip_reads.bed newqdrip_gl3_reads.bed rh_reads.bed groseq_reads.bed cont_1.m.bed cont_1.p.bed cont_2.m.bed cont_2.p.bed cyto_gl3_reads.bed cyto_setx_reads.bed -names qdrip newqdrip_gl3 rh groseq cont_1.m cont_1.p cont_2.m cont_2.p cyto_gl3 cyto_setx > final_annotated_peaks_using_expanded_genes.cov
+
+#these both give same outputs in terms of count, but with annotate can do multiple files at once.
+
+Coverage over my v25 genes 
+
+mm10_v25_basic.6col.bed
+
+For coverage files, need to divide read counts over peaks by RPM:
+
+cov_read_counts.json
+
+{
+    "qdrip": 55631162,
+    "newqdrip_gl3": 61208343,
+    "drip_seq": 94421268,
+    "rh": 20738669,
+    "rh_all": 68100216,
+    "rdip": 33846209,
+    "rdip_rh": 3015769,
+    "newqdrip_brca1": 60797042,
+    "newqdrip_setx": 69757114,
+    "igg": 25054321,
+    "newqdrip_input": 26485726,
+    "cyto_gl3": 63207794,
+    "cyto_setx": 74898563,
+    "qdrip_input": 25450659,
+    "groseq": 27074834,
+    "drb": 4192769,
+    "ctrl_input": 32693551,
+    "rh_high": 25266523,
+    "rh_low": 22095024,
+    "drb_rh":20496530  
+}
+
+See notebook: http://localhost:9051/notebooks/cytoDRIP_coverage_groseq_qdrip.ipynb
+
+
+Do pie chart of genes that overlap an R-loop:
+
+mm10_v25_basic.6col.bed
+
+bedtools slop -i mm10_v25_basic.6col.bed -g mm10.chrom.sizes -b 3000 > mm10_v25_3kb_slop_genes.bed
+
+bedtools intersect -wo -b hepa_annotated_peaks.bed  -a mm10_v25_3kb_slop_genes.bed > hepa_intersect_v25_genes.tsv
+bedtools intersect -wo -b liver_annotated_peaks.bed  -a mm10_v25_3kb_slop_genes.bed > liver_intersect_v25_genes.tsv
+
+Volcano plot of differentially expressed genes:
+
+https://hemtools.readthedocs.io/en/latest/content/Bioinformatics_Core_Competencies/Volcanoplot.html
+
+
+
+scp cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/hepa_peaks_slop_3kb_full_genes.tsv /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+scp cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/liver_peaks_slop_3kb_full_genes.tsv /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+scp cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/peak_calling/hepa_peak_calls/* /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+scp cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/peak_calling/liver_peak_calls/* /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+scp /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/liver_annotated_peaks.bed cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+scp /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/hepa_annotated_peaks.bed cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+
+scp /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/e14_annotated_peaks.bed cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+
+scp /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/t3_annotated_peaks.bed cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+scp /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab/DRIP_Seq.bw cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/
+
+
+scp cimprich@cimprichserver:/Volumes/Pegasus/qDRIP/qDRIP_09022019/revisions_2020/notebooks/Mike_peaks/* /Users/madziacrossley/MPC_files/Madzia_Laptop/Documents/cytoDRIP_May2020/matrix_files/mike_notebooks_qdrip
+
+scp cimprich@cimprichserver:/Volumes/Pegasus/puzzo_drip_seq/hepa_peaks_slop_3kb_full_genes.tsv /Users/madziacrossley/Library/CloudStorage/Box-Box/MPC_files/Desktop_Files/Collaborations/Puzzo_Kay_lab
+
+CEAS: 
+http://cistrome.org/ap/root
+
+Chip seeker:
+
+https://nbisweden.github.io/workshop-archive/workshop-ChIP-seq/2018-11-07/labs/lab-ChIPseeker.html
+http://bioconductor.org/packages/devel/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html#peak-annotation
+
+CHIP peak anno:
+https://jianhong.github.io/workshop2020/articles/ChIPpeakAnno.html
+https://www.bioconductor.org/packages/devel/bioc/vignettes/ChIPpeakAnno/inst/doc/ChIPpeakAnno.html#Obtain_the_enriched_Gene_Ontology_(GO)_terms_or_reactomeKEGG_terms_for_the_genes_near_the_peaks
+
+GO analysis
+
+https://www.biocode.org.uk/2022/04/07/enrichment-analysis-gene-ontology-and-kegg-pathways-analysis/
+https://academic.oup.com/nar/article/47/W1/W206/5485528
+
+https://www.youtube.com/watch?v=ONiWugVEf2s
+
+http://go.cistrome.org/static/Tutorial.html#input
+
+https://www.biocode.org.uk/2022/04/07/enrichment-analysis-gene-ontology-and-kegg-pathways-analysis/
+
+https://keggtools.org/
+
+https://pypi.org/project/keggtools/
+
+http://geneontology.org/docs/go-enrichment-analysis/
+
+Homer: http://homer.ucsd.edu/homer/microarray/go.html
+https://hemtools.readthedocs.io/en/latest/content/Bioinformatics_tools/homer.html
+
+https://www.ebi.ac.uk/gxa/FAQ.html#:~:text=Light%20blue%20box%3A%20expression%20level,or%2011%20to%201000%20TPM)
+
+Biopython:
+https://biopython-tutorial.readthedocs.io/en/latest/notebooks/01%20-%20Introduction.html
+
+Bioawk:
+
+https://bioinformaticsworkbook.org/Appendix/Unix/bioawk-basics.html#gsc.tab=0
