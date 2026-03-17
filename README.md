@@ -5,7 +5,7 @@ This repository contains the analysis code used for DRIP‑seq experiments gener
 ## inputs
 
 * samplesheet.csv   : headings (sample_id,read1,read2,species,treatment,replicate)
-* parameters.yml    : pipeline parameters, such as: output_dir, adapter_fwd, adapter_fwd, ...
+* parameters.yml    : pipeline parameters, such as: output_dir, adapter_fwd, adapter_fwd, ... 
 
 ## worflow
 
