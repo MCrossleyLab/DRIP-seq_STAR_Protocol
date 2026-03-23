@@ -1,0 +1,13 @@
+sample_id,read1,read2,species,treatment,replicate,tissue,condition
+SRR28361287,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361287_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361287_2.fastq,mm10,input,rep1,Liver,none
+SRR28361288,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361288_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361288_2.fastq,mm10,ip.RNAseH1,rep1,Liver,RNAseH1
+SRR28361289,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361289_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361289_2.fastq,mm10,ip,rep1,Liver,none
+SRR28361290,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361290_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361290_2.fastq,mm10,input,rep2,HEPA1-6,none
+SRR28361291,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361291_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361291_2.fastq,mm10,ip.RNAseH1,rep2,HEPA1-6,RNAseH1
+SRR28361292,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361292_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361292_2.fastq,mm10,ip,rep2,HEPA1-6,none
+SRR28361293,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361293_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361293_2.fastq,mm10,input,rep1,HEPA1-6,none
+SRR28361294,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361294_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361294_2.fastq,mm10,ip.RNAseH1,rep1,HEPA1-6,RNAseH1
+SRR28361295,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361295_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361295_2.fastq,mm10,input,rep2,Liver,none
+SRR28361296,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361296_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361296_2.fastq,mm10,ip.RNAseH1,rep2,Liver,RNAseH1
+SRR28361297,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361297_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361297_2.fastq,mm10,ip,rep2,Liver,none
+SRR28361298,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361298_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361298_2.fastq,mm10,ip,rep1,HEPA1-6,none

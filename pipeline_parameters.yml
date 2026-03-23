@@ -1,0 +1,23 @@
+# YAML input file for cytoDRIP
+# Paths should be absolute paths
+# YAML 1.1
+
+############################### 
+#### entry parameters dir #####
+###############################
+outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol  # output directory for all results
+outdir_name: results  # output directory for all results
+samplesheet: /Users/massal01/DRIP-seq_STAR_Protocol/samplesheet.csv # path to samplesheet
+genome_path: /Users/massal01/Genomics/indexes  # directory containing indexes and genome
+
+################################
+#### bowtie reads workflow #####
+################################
+adapter_fwd: GATCGGAAGAGCACACGTCTGAACTCCAGTCACN{8}
+adapter_rev: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
+
+
+
+# scancel -t RUNNING -u $USER
+# ~/submit_nextflow.sh /Users/massal01/DRIP-seq_STAR_Protocol/main.nf /Users/massal01/DRIP-seq_STAR_Protocol/pipeline_parameters.yml
+# watch -d squeue --user=massal01

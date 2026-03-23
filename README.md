@@ -1,4 +1,4 @@
-# DRIP‑seq pipeline
+# DRIP-seq_STAR_Protocol
 
 This repository contains the analysis code used for DRIP‑seq experiments genereated by Puzzo et al. [https://www.sciencedirect.com/science/article/pii/S1525001624006609?via%3Dihub] and described in the STAR Protocol manuscript.
 
@@ -25,4 +25,3 @@ pybedtools=0.12.0
 bedtools=2.31.1
 deeptools=3.5.6
 ```
-# DRIP-seq_STAR_Protocol
