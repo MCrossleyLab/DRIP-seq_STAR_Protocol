@@ -46,18 +46,18 @@ workflow {
     // 3) Mark duplicates
     markdup_out = markdup_bams(aligned_ch) // (sid, species, aligned_bam) >> (sid, species, markdup_bam)
 
-    // 6a) norm from bedGraph
-    // meta_ch = samples_ch.map{ sid, read1, read2, species, treatment, replicate, tissue, condition -> tuple(sid, treatment, replicate) }
+    // 4) norm from bedGraph
     meta_ch = samples_ch.map{ sid, read1, read2, species, m -> tuple(sid, m.treatment, m.replicate) }
     
-    // 6b) norm from bams
+    // 5a) combine metadata
     bam_with_meta_ch = markdup_out.markdup_ch
         .combine(meta_ch, by: 0) // tuple(sid, species, markdup_bam, treatment, replicate)
     
-    // Run RPM-from-BAM workflow
+    // 5b) make bigWigs
     bam_norm_out = bam_to_bigWig(bam_with_meta_ch)
     
-
+    // 6 ) 
+    
     // 3) Join BAMs with metadata by sample_id
     design_mat_ch = samples_ch.map { sample_id, read1, read2, spec, m ->
         tuple(
@@ -126,7 +126,8 @@ workflow {
         meta.tissue == 'HEPA1-6' && meta.tret == 'ip.RNAseH1'
     }
 
-
+    hepa_rnaseh1_ch | view
+    
     // branches.liver_ip
     // .map { meta, bams -> tuple(meta.species, meta.tissue, meta.tret, bams.flatten()) }
     // | view

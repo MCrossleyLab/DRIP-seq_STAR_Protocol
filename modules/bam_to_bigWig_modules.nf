@@ -134,5 +134,5 @@ process BAMCOVERAGE {
       // --ignoreDuplicates \\
       // --extendReads \\
       // --centerReads
-// --normalizeUsing None \\
-// --scaleFactor ${rpm_scale_factor} \\
+      // --normalizeUsing None \\
+      // --scaleFactor ${rpm_scale_factor} \\

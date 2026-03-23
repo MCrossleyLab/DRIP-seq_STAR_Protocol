@@ -1,14 +1,13 @@
-# YAML input file for cytoDRIP
-# Paths should be absolute paths
-# YAML 1.1
+# YAML input file for DRIP-seq_STAR_Protocol
+# Please use absolute paths
 
 ############################### 
 #### entry parameters dir #####
 ###############################
-outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol  # output directory for all results
-outdir_name: results  # output directory for all results
-samplesheet: /Users/massal01/DRIP-seq_STAR_Protocol/samplesheet.csv # path to samplesheet
-genome_path: /Users/massal01/Genomics/indexes  # directory containing indexes and genome
+outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
+outdir_name: results                                                      # output directory name
+samplesheet: /Users/massal01/DRIP-seq_STAR_Protocol/samplesheet.csv       # path to samplesheet
+genome_path: /Users/massal01/Genomics/indexes                             # directory containing indexes and genome
 
 ################################
 #### bowtie reads workflow #####
