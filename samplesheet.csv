@@ -1,4 +1,4 @@
-sample_id,read1,read2,species,treatment,replicate,tissue,condition
+sample_id,fastq1,fastq2,species,treatment,replicate,tissue,condition
 SRR28361287,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361287_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361287_2.fastq,mm10,input,rep1,Liver,none
 SRR28361288,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361288_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361288_2.fastq,mm10,ip.RNAseH1,rep1,Liver,RNAseH1
 SRR28361289,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361289_1.fastq,/mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol/sra_data/SRR28361289_2.fastq,mm10,ip,rep1,Liver,none
