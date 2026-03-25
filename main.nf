@@ -58,7 +58,7 @@ workflow {
     
     // 6 ) 
     
-    // 3) Join BAMs with metadata by sample_id
+    // 3) Merge BAMs with metadata by sample_id
     design_mat_ch = samples_ch.map { sample_id, read1, read2, spec, m ->
         tuple(
             id:   sample_id,
