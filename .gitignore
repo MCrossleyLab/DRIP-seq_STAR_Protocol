@@ -16,4 +16,4 @@
 # Keep specific directories (and their contents)
 !/modules/
 !/workflows/
-!/contents/
+# !/contents/
