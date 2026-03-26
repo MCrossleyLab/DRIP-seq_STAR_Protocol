@@ -49,7 +49,7 @@ conda env create -f ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/envir
 conda activate DRIP-seq_STAR
 conda install nextflow=25.10.2
 nextflow pull MCrossleyLab/DRIP-seq_STAR_Protocol
-nextflow nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
+nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
     --profile slurmc \
     -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml \
     -with-conda \
