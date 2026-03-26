@@ -4,7 +4,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - nextflow=25.10.2
   - python=3.11
   - cutadapt=5.2
   - bowtie2=2.5.4
