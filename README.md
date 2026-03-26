@@ -45,11 +45,15 @@ Below you will find the required input files, a high‑level workflow descriptio
 ## Running the pipeline
 
 ```sh
-conda create -n DRIP-seq_STAR python=3.11
+conda env create -f ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/environment.yml
 conda activate DRIP-seq_STAR
 conda install nextflow=25.10.2
 nextflow pull MCrossleyLab/DRIP-seq_STAR_Protocol
-nextflow run https://github.com/MCrossleyLab/DRIP-seq_STAR_Protocol
+nextflow nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
+    --profile slurmc \
+    -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml \
+    -with-conda \
+    -resume
 ```
 
 ## Requirements
