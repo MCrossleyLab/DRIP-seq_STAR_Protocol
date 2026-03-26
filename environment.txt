@@ -1,4 +1,0 @@
-# platform: linux-64
-# created-by: conda 25.11.0
-
-cutadapt==5.2
