@@ -4,9 +4,10 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - nextflow=25.10.2
   - python=3.11
   - cutadapt=5.2
   - bowtie2=2.5.4
   - samtools=1.6
-  - bedtools=2.31.1
+  - deeptools=3.5.6
   # add any other tools your processes use
