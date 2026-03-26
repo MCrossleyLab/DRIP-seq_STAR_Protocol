@@ -6,7 +6,7 @@
 ###############################
 outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
 outdir_name: results01                                                    # output directory name
-samplesheet: ./.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol//samplesheet.csv       # path to samplesheet
+samplesheet: ./.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/samplesheet.csv       # path to samplesheet
 genome_path: ./Genomics/indexes                             # directory containing indexes and genome
 
 ################################
