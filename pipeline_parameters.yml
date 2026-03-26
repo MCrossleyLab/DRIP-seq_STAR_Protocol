@@ -12,12 +12,5 @@ genome_path: /Users/massal01/Genomics/indexes                             # dire
 ################################
 #### bowtie reads workflow #####
 ################################
-# adapter_fwd: GATCGGAAGAGCACACGTCTGAACTCCAGTCACN{8}
 adapter_fwd: AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
-# adapter_rev: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
 adapter_rev: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
-
-
-# scancel -t RUNNING -u $USER
-# ~/submit_nextflow.sh /Users/massal01/DRIP-seq_STAR_Protocol/main.nf /Users/massal01/DRIP-seq_STAR_Protocol/pipeline_parameters.yml
-# watch -d squeue --user=massal01
