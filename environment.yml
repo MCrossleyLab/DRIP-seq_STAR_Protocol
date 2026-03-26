@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - python=3.11
-  - cutadapt==5.2
+  - cutadapt=5.2
   - bowtie2=2.5.4
   - samtools=1.6
   - bedtools=2.31.1
