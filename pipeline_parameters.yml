@@ -4,10 +4,10 @@
 ############################### 
 #### entry parameters dir #####
 ###############################
-outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
+outdir_path: .          # output directory path
 outdir_name: results01                                                    # output directory name
-samplesheet: /Users/massal01/DRIP-seq_STAR_Protocol/samplesheet.csv       # path to samplesheet
-genome_path: /Users/massal01/Genomics/indexes                             # directory containing indexes and genome
+samplesheet: ./samplesheet.csv       # path to samplesheet
+genome_path: ./Genomics/indexes                             # directory containing indexes and genome
 
 ################################
 #### bowtie reads workflow #####
