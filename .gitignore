@@ -2,7 +2,7 @@
 /*
 
 # But keep the .gitignore itself
-.gitignore
+!.gitignore
 
 # Keep specific files
 !README.md
