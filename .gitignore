@@ -11,6 +11,7 @@
 !pipeline_parameters.yml
 !STAR_versions.yml
 !samplesheet.csv
+!environment.yml
 !*.txt
 
 # Keep specific directories (and their contents)
