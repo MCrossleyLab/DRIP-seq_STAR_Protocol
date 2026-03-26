@@ -46,6 +46,7 @@ Below you will find the required input files, a high‑level workflow descriptio
 
 ```sh
 conda create -n DRIP-seq_STAR python=3.11
+conda activate DRIP-seq_STAR
 conda install nextflow=25.10.2
 nextflow run https://github.com/MCrossleyLab/DRIP-seq_STAR_Protocol
 ```
