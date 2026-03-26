@@ -5,6 +5,9 @@ include { CUTADAPT_ADAPTER_TRIM;
           BOWTIE2_ALIGN } from '../modules/bowtie_reads_modules.nf'
           
 
+// Where Bowtie2 indexes live
+params.bowtie2_index_dir    = params.genome_path
+
 def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") {
     def uniq = species_list as List
     uniq = uniq.collect { it?.toString()?.trim() }.findAll { it }      // non-empty strings
