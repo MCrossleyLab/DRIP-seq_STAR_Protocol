@@ -8,19 +8,47 @@ This project provides a Nextflow‑based pipeline to process DRIP‑seq raw FAST
 
 Below you will find the required input files, a high‑level workflow description, and the software dependencies needed to run the pipeline.
 
-## Inputs
-
-* `samplesheet.csv:`</br>
-    Required columns: `sample_id`, `read1`, `read2`, `species`, `treatment`, `replicate`, `tissue`, `condition`
-    </br></br>
-* `parameters.yml`:</br>
-    Pipeline configuration, e.g. `output_dir`, `adapter_fwd`, `adapter_rev`, and other run‑time parameters
-
 ## Workflow
 
 1. Generate aligned BAM files from raw FASTQ reads
 2. Compute normalisation factors for each sample
 3. Produce normalised BigWig track files for downstream visualisation and analysis
+
+## Inputs
+
+* `samplesheet.csv:`</br>
+    Required columns: `sample_id`, `read1`, `read2`, `species`, `treatment`, `replicate`, `tissue`, `condition`
+    </br></br>
+* `pipeline_parameters.yml`:</br>
+    Pipeline configuration, e.g. `output_dir`, `adapter_fwd`, `adapter_rev`, `genome_path` and other run‑time parameters
+    </br></br>
+
+    ***Important note***</br>
+    Mouse genome related files should be downloaded before running the pipeline. Please update the file paths into `genome_path` in the `pipeline_parameters.yml` file, and make sure it is accessible with the correct folder permissions.
+
+    To download the genome related files (for bowtie step and chromosome annotations) please follow the following steps:
+
+    1. Download the genome FASTA and chromosome sizes:</br>
+        `wget https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.fa.gz`</br>
+        `wget https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes`</br>
+
+    2. Decompress the FASTA file:</br>
+        `gunzip mm10.fa.gz`</br>
+
+    3. Rename chromosome prefixes to include the genome name:</br>
+        `sed 's/^>chr/>mm10_chr/' mm10.fa > mm10_renamed.fa`</br>
+        `sed 's/^chr/mm10_chr/' mm10.chrom.sizes > mm10_renamed.chrom.sizes`</br>
+
+    4. Build the Bowtie2 index:</br>
+        `bowtie2-build mm10.fa mm10`</br>
+
+## Running the pipeline
+
+```sh
+codna create -n DRIP-seq_STAR python=3.11
+conda install nextflow=25.10.2
+nextflow run https://github.com/MCrossleyLab/DRIP-seq_STAR_Protocol
+```
 
 ## Requirements
 

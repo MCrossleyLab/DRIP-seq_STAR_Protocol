@@ -1,20 +1,15 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-include { FASTQC_RAW; 
-          CUTADAPT_ADAPTER_TRIM; 
-          CUTADAPT_TAIL_TRIM; 
+include { CUTADAPT_ADAPTER_TRIM; 
           BOWTIE2_ALIGN } from '../modules/bowtie_reads_modules.nf'
           
 
-// Where Bowtie2 indexes live
 params.bowtie2_index_dir    = params.genome_path
-// Optional: suffix to add, if you name indexes like hg38_mm10_spike
 params.bowtie2_index_suffix = params.bowtie2_index_suffix ?: ""
 
 
 def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") {
-    // Ensure we have a plain List and clean it
     def uniq = species_list as List
     uniq = uniq.collect { it?.toString()?.trim() }.findAll { it }      // non-empty strings
     uniq = uniq.unique()
@@ -26,27 +21,20 @@ def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") 
     def keys = []
 
     if (uniq.size() == 1) {
-        // Single species: just that name
         keys << uniq[0]
     } else {
-        // Multiple species: only concatenations
-
-        // 1) Pairwise combinations (i < j and reversed)
         for (int i = 0; i < uniq.size(); i++) {
             for (int j = i + 1; j < uniq.size(); j++) {
                 def a = uniq[i]
                 def b = uniq[j]
-                keys << "${a}_${b}"   // e.g. hg38_mm10
-                keys << "${b}_${a}"   // e.g. mm10_hg38
+                keys << "${a}_${b}"
+                keys << "${b}_${a}"
             }
         }
-
-        // 2) Full combinations
-        keys << uniq.join('_')          // original order
-        keys << uniq.sort().join('_')   // sorted order
+        keys << uniq.join('_')
+        keys << uniq.sort().join('_')
     }
 
-    // Remove duplicates while preserving order
     keys = keys.unique()
 
     for (key in keys) {
@@ -72,16 +60,14 @@ def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") 
 workflow bowtie_reads {
 
     take:
-    samples_ch // (sample_id, r1, r2, species_list)
+    samples_ch
 
     main:
     raw_pairs_ch     = samples_ch.map { sid, r1, r2, sp -> tuple(sid, file(r1), file(r2)) }
-    raw_pairs_ch | FASTQC_RAW
     raw_pairs_ch | CUTADAPT_ADAPTER_TRIM
-    CUTADAPT_TAIL_TRIM(CUTADAPT_ADAPTER_TRIM.out.sid_fastq_files)
     
-    species_ch = samples_ch.map { sid, r1, r2, sp -> tuple(sid, sp) } // (sample_id, species_list)
-    joined_ch = CUTADAPT_TAIL_TRIM.out.sid_fastq_files.join(species_ch) // (sample_id, tail_r1, tail_r2, species_list)
+    species_ch = samples_ch.map { sid, r1, r2, sp -> tuple(sid, sp) }
+    joined_ch = CUTADAPT_ADAPTER_TRIM.out.sid_fastq_files.join(species_ch)
     
     bowtie_input_ch = joined_ch.map { sid, r1, r2, species_list ->
         def idx_base = findIndexFromSpecies(
@@ -91,7 +77,6 @@ workflow bowtie_reads {
         )
         tuple(sid, r1, r2, params.bowtie2_extra_params, idx_base, species_list)
     }
-    // bowtie_input_ch | view 
     BOWTIE2_ALIGN(bowtie_input_ch)
     
     emit:

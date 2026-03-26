@@ -1,10 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-/*
- * Input:  tuple(sample_id, bam)
- * Output: tuple(sample_id, collate.bam)
- */
 process SAMTOOLS_COLLATE {
     tag "${sample_id}"
 
@@ -22,10 +18,6 @@ process SAMTOOLS_COLLATE {
     """
 }
 
-/*
- * Input:  tuple(sample_id, collate.bam)
- * Output: tuple(sample_id, fixmate.bam)
- */
 process SAMTOOLS_FIXMATE {
     tag "${sample_id}"
 
@@ -43,10 +35,6 @@ process SAMTOOLS_FIXMATE {
     """
 }
 
-/*
- * Input:  tuple(sample_id, fixmate.bam)
- * Output: tuple(sample_id, positionsorted.bam)
- */
 process SAMTOOLS_SORT {
     tag "${sample_id}"
 
@@ -64,10 +52,7 @@ process SAMTOOLS_SORT {
     """
 }
 
-/*
- * Input:  tuple(sample_id, positionsorted.bam)
- * Output: tuple(sample_id, markdup.bam)
- */
+
 process SAMTOOLS_MARKDUP_INDEX {
     tag "${sample_id}"
 
@@ -88,10 +73,6 @@ process SAMTOOLS_MARKDUP_INDEX {
     """
 }
 
-/*
- * Input:  tuple(sample_id, markdup.bam)
- * Output: tuple(sample_id, flagstat.txt)
- */
 process SAMTOOLS_FLAGSTAT {
     tag "${sample_id}"
 
@@ -108,20 +89,3 @@ process SAMTOOLS_FLAGSTAT {
     samtools flagstat "${markdup_bam}" > ${sample_id}.flagstat.txt
     """
 }
-
-// process FLAGSTAT_SUMMARY_MATRIX {
-//     tag "flagstat_summary"
-
-//     publishDir "${params.outdir}/markdup_bams", mode: 'copy', pattern: "samtools_flagstat_matrix.tsv"
-
-//     input:
-//     val flagstat_lines // a single value: list or string, depending on how you use it
-
-//     output:
-//     path "samtools_flagstat_matrix.tsv"
-
-//     script:
-//     """
-//     python /Users/massal01/0_base_scr/cytoDRIP_align/cytoDRIP_HM/report_code/agg_flagstat_matrix.py ${flagstat_lines} samtools_flagstat_matrix.tsv
-//     """
-// }
