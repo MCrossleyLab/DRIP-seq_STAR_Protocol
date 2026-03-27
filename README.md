@@ -49,7 +49,7 @@ conda create -n DRIP-seq_STAR -c conda-forge -c bioconda python=3.11 cutadapt=5.
 conda activate DRIP-seq_STAR
 nextflow pull MCrossleyLab/DRIP-seq_STAR_Protocol
 nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
-    --profile slurmc \
+    -profile slurmc \
     -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml \
     -with-conda \
     -resume
