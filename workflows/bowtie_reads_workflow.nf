@@ -6,7 +6,7 @@ include { CUTADAPT_ADAPTER_TRIM;
           
 
 // Where Bowtie2 indexes live
-params.bowtie2_index_dir    = params.genome_path
+// params.bowtie2_index_dir    = params.genome_path
 
 def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") {
     def uniq = species_list as List
