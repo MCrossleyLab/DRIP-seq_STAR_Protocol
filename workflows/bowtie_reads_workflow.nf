@@ -3,10 +3,6 @@ nextflow.enable.dsl=2
 
 include { CUTADAPT_ADAPTER_TRIM; 
           BOWTIE2_ALIGN } from '../modules/bowtie_reads_modules.nf'
-          
-
-// Where Bowtie2 indexes live
-// params.bowtie2_index_dir    = params.genome_path
 
 def findIndexFromSpecies(List species_list, String idx_dir, String suffix = "") {
     def uniq = species_list as List
@@ -77,9 +73,7 @@ workflow bowtie_reads {
         tuple(sid, r1, r2, params.bowtie2_extra_params, idx_base, species_list)
     }
     
-    bowtie_input_ch
-        .map { it.toString() }
-        .collectFile(name: 'bowtie_input_ch.txt', storeDir: params.outdir)
+    bowtie_input_ch | view
     
     BOWTIE2_ALIGN(bowtie_input_ch)
     
