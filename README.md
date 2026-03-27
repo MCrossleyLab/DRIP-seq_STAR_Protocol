@@ -61,7 +61,7 @@ nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
 The pipeline has been tested with the following tool versions:
 
 ```sh
-python=3.11.11
+python=3.11
 nextflow=25.10.0
 cutadapt=5.2
 bowtie2=2.5.4
