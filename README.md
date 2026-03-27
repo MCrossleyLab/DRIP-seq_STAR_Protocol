@@ -43,7 +43,7 @@ Below you will find the required input files, a high‑level workflow descriptio
         `bowtie2-build mm10.fa mm10`</br>
 
 ## Running the pipeline
-
+open an new terminal session and run the following lines in order
 ```sh
 conda env create -f ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/environment.yml
 conda activate DRIP-seq_STAR
