@@ -11,8 +11,8 @@ Below you will find the required input files, a high‑level workflow descriptio
 ## Workflow
 
 1. Generate aligned BAM files from raw FASTQ reads
-2. Compute normalisation factors for each sample
-3. Produce normalised BigWig track files for downstream visualisation and analysis
+2. Markup BAM files
+3. Produce normalized BigWig track files
 
 ## Inputs
 
