@@ -62,7 +62,7 @@ The pipeline has been tested with the following tool versions:
 
 ```sh
 python=3.11
-nextflow=25.10.0
+nextflow=25.10.2
 cutadapt=5.2
 bowtie2=2.5.4
 samtools=1.6
