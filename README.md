@@ -45,8 +45,9 @@ Below you will find the required input files, a high‑level workflow descriptio
 ## Running the pipeline
 open an new terminal session and run the following lines in order
 ```sh
-conda create -n DRIP-seq_STAR02 python=3.11 nextflow=25.10.2
-conda activate DRIP-seq_STAR02
+conda create -n DRIP-seq_STAR python=3.11 nextflow=25.10.2
+conda activate DRIP-seq_STAR
+nextflow pull MCrossleyLab/DRIP-seq_STAR_Protocol
 nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
     -profile slurmc \
     -with-conda \

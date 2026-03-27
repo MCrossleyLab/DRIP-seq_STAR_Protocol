@@ -5,9 +5,9 @@
 #### entry parameters dir #####
 ###############################
 outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol   # Output directory path (change to your own path; make sure it is accessible on the computing cluster)
-outdir_name: results01                                             # Output directory name
+outdir_name: results_GitHub                                        # Output directory name
 # samplesheet: /path/to/samplesheet.csv                            # Uncomment to provide an absolute path to a local samplesheet.csv file
-genome_path: /mnt/scratchc/mclab/massal01/Genomics/indexes         # Provide an absolute path to the Genomics/indexes folder
+genome_path: /Users/massal01/Genomics/indexes                      # Provide an absolute path to the Genomics/indexes folder
 
 ################################
 #### bowtie reads workflow #####
