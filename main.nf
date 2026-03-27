@@ -11,6 +11,8 @@ workflow {
     log.info "[INFO] using samplesheet: ${params.samplesheet}"
     log.info "[INFO] using genome_path: ${params.genome_path}"
     log.info "[INFO] writing output to: ${params.outdir}"
+    log.info "[INFO] starting processes..."
+    log.info "[INFO] "
 
     // 1) Read samplesheet
     ch_meta = Channel
