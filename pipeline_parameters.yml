@@ -6,7 +6,7 @@
 ###############################
 outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
 outdir_name: results01                                                    # output directory name
-samplesheet: samplesheet.csv
+# samplesheet: samplesheet.csv
 genome_path: Genomics/indexes    # relative name only
 
 ################################
