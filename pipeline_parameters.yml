@@ -1,13 +1,13 @@
 # YAML input file for DRIP-seq_STAR_Protocol
-# Use absolute paths
+# Use absolute paths where indicated
 
-############################### 
+###############################
 #### entry parameters dir #####
 ###############################
-outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
-outdir_name: results01                                                    # output directory name
-# samplesheet: samplesheet.csv
-# genome_path: Genomics/indexes    # relative name only
+outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol   # Output directory path (change to your own path; make sure it is accessible on the computing cluster)
+outdir_name: results01                                             # Output directory name
+# samplesheet: /path/to/samplesheet.csv                            # Uncomment to provide an absolute path to a local samplesheet.csv file
+# genome_path: /path/to/Genomics/indexes                           # Uncomment to provide an absolute path to the Genomics/indexes folder
 
 ################################
 #### bowtie reads workflow #####

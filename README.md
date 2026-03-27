@@ -45,14 +45,13 @@ Below you will find the required input files, a high‑level workflow descriptio
 ## Running the pipeline
 open an new terminal session and run the following lines in order
 ```sh
-conda create -n DRIP-seq_STAR -c conda-forge -c bioconda python=3.11 cutadapt=5.2 bowtie2=2.5.4 samtools=1.6 deeptools=3.5.6 nextflow=25.10.2
+conda create -n DRIP-seq_STAR python=3.11 nextflow=25.10.2
 conda activate DRIP-seq_STAR
-nextflow pull MCrossleyLab/DRIP-seq_STAR_Protocol
 nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
     -profile slurmc \
-    -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml \
     -with-conda \
-    -resume
+    -resume \
+    -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml
 ```
 
 ## Requirements
