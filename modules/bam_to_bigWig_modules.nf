@@ -36,7 +36,8 @@ process BAMCOVERAGE {
     publishDir "${params.outdir}/normalized_BigWig_files", mode: 'copy', pattern: "*.bamCov.CPM.bw"
 
     input:
-    tuple val(sample_id), val(species), path(bam_file), val(treatment), val(replicate), val(non_duplicate_reads), val(rpm_scale_factor)
+    // tuple val(sample_id), val(species), path(bam_file), val(treatment), val(replicate), val(non_duplicate_reads), val(rpm_scale_factor)
+    tuple val(sample_id), val(species), path(bam_file), val(treatment), val(replicate)
 
     output:
     tuple val(sample_id), val(species), val(treatment), val(replicate),
