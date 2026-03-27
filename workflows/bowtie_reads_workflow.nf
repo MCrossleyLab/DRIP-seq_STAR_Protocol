@@ -73,8 +73,6 @@ workflow bowtie_reads {
         tuple(sid, r1, r2, params.bowtie2_extra_params, idx_base, species_list)
     }
     
-    bowtie_input_ch | view
-    
     BOWTIE2_ALIGN(bowtie_input_ch)
     
     emit:
