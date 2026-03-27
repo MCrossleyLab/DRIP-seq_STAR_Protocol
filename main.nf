@@ -7,6 +7,10 @@ include { bam_to_bigWig       } from './workflows/bam_to_bigWig_workflow.nf'
 
 
 workflow {
+    // Log parameters
+    log.info "[INFO] using samplesheet: ${params.samplesheet}"
+    log.info "[INFO] using genome_path: ${params.genome_path}"
+    log.info "[INFO] writing output to: ${params.outdir}"
 
     // 1) Read samplesheet
     ch_meta = Channel
