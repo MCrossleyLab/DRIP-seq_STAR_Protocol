@@ -7,8 +7,9 @@
 outdir_path: /mnt/scratchc/mclab/massal01/DRIP-seq_STAR_Protocol          # output directory path
 outdir_name: results01                                                    # output directory name
 # samplesheet: /Users/massal01/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/samplesheet.csv       # path to samplesheet
-samplesheet: '${projectDir}/samplesheet.csv'       # path to samplesheet
-genome_path: '${projectDir}/Genomics/indexes'                             # directory containing indexes and genome
+samplesheet: samplesheet.csv
+# genome_path: '${projectDir}/Genomics/indexes'                             # directory containing indexes and genome
+genome_path: Genomics/indexes    # relative name only
 
 ################################
 #### bowtie reads workflow #####
