@@ -16,6 +16,8 @@ Below you will find the required input files, a high‑level workflow descriptio
 
 ## Inputs
 
+***please download the two files listed below to your local machine, and update all  paths so that they match the locations on your system***
+
 * `samplesheet.csv:`</br>
     Required columns: `sample_id`, `read1`, `read2`, `species`, `treatment`, `replicate`, `tissue`, `condition`
     </br></br>
@@ -44,7 +46,8 @@ Below you will find the required input files, a high‑level workflow descriptio
 
 ## Running the pipeline
 
-open an new terminal session and run the following lines in order
+Open an new terminal session and run the following lines in order</br>
+If you are running the pipeline on a local machine, replace `-profile slurmc` with `-profile local`.
 
 ```sh
 conda create -n DRIP-seq_STAR python=3.11 nextflow=25.10.2
