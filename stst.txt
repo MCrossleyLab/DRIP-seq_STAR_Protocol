@@ -1,0 +1,22 @@
+executor >  slurm (111)
+[d2/90f181] bow…ADAPTER_TRIM (SRR28361297) | 12 of 12 ✔
+[0a/accfa1] bow…OWTIE2_ALIGN (SRR28361288) | 12 of 12 ✔
+[be/e901a2] mar…OOLS_COLLATE (SRR28361288) | 12 of 12 ✔
+[45/d29493] mar…OOLS_FIXMATE (SRR28361288) | 12 of 12 ✔
+[b1/18b930] mar…AMTOOLS_SORT (SRR28361288) | 12 of 12 ✔
+[35/725dbd] mar…ARKDUP_INDEX (SRR28361288) | 12 of 12 ✔
+[cf/d3f119] mar…OLS_FLAGSTAT (SRR28361288) | 12 of 12 ✔
+[63/32fa4f] bam…88-[mm10]-ip.RNAseH1-rep1) | 12 of 12 ✔
+[07/51ac58] bam…1288-mm10-ip.RNAseH1-rep1) | 12 of 12 ✔
+[ca/2eca2e] pea…2_CALLPEAK (hepa_ip_vs_in) | 2 of 2 ✔
+[c3/f263b0] pea…_REPORT (broadpeak_report) | 1 of 1 ✔
+Completed at: 30-Apr-2026 16:15:56
+Duration    : 1h 21m 33s
+CPU hours   : 89.9
+Succeeded   : 111
+
+
+=========================================
+Finished with exit code: 0
+Finished at: Thu Apr 30 16:15:58 BST 2026
+=========================================

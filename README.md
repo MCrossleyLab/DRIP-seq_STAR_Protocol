@@ -13,6 +13,7 @@ Below you will find the required input files, a high‑level workflow descriptio
 1. Generate aligned BAM files from raw FASTQ reads
 2. Markup BAM files
 3. Produce normalized BigWig track files
+4. Performe peak calling
 
 ## Inputs
 
@@ -22,7 +23,7 @@ Below you will find the required input files, a high‑level workflow descriptio
     Required columns: `sample_id`, `read1`, `read2`, `species`, `treatment`, `replicate`, `tissue`, `condition`
     </br></br>
 * `pipeline_parameters.yml`:</br>
-    Pipeline configuration, e.g. `output_dir`, `adapter_fwd`, `adapter_rev`, `genome_path` and other run‑time parameters
+    Pipeline configuration, e.g. `output_dir`, `adapter_fwd`, `adapter_rev`, `genome_path`, `contrasts` and other run‑time parameters
     </br></br>
 
     ***Important note***</br>
@@ -59,18 +60,3 @@ nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
     -resume \
     -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml
 ```
-
-## Requirements
-
-The pipeline has been tested with the following tool versions:
-
-```sh
-python=3.11
-nextflow=25.10.2
-cutadapt=5.2
-bowtie2=2.5.4
-samtools=1.6
-deeptools=3.5.6
-```
-
-Make sure these tools are available in your environment (e.g. via Conda) before running the pipeline.

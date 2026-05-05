@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 include { bowtie_reads        } from './workflows/bowtie_reads_workflow.nf'
 include { markdup_bams        } from './workflows/markdup_bams_workflow.nf'
 include { bam_to_bigWig       } from './workflows/bam_to_bigWig_workflow.nf'
+include { peak_calling        } from './workflows/peak_calling_workflow.nf'
 
 
 workflow {
@@ -42,14 +43,13 @@ workflow {
     // 3) Mark duplicates
     markdup_out = markdup_bams(aligned_ch)
 
-    // 4) Get metadata
+    // 4) Make bigWigs
     meta_ch = samples_ch.map{ sid, fastq1, fastq2, species, m -> tuple(sid, m.treatment, m.replicate) }
-    
-    // 4a) combine metadata
     bam_with_meta_ch = markdup_out.markdup_ch
         .combine(meta_ch, by: 0)
-    
-    // 4b) make bigWigs
     bam_norm_out = bam_to_bigWig(bam_with_meta_ch)
+    
+    // 5) peak calling
+    peak_calling_out = peak_calling(bam_with_meta_ch)
 }
 
