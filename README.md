@@ -11,9 +11,9 @@ Below you will find the required input files, a high‑level workflow descriptio
 ## Workflow
 
 1. Generate aligned BAM files from raw FASTQ reads
-2. Markup BAM files
+2. Mark duplicate reads in BAM files
 3. Produce normalized BigWig track files
-4. Performe peak calling
+4. Perform peak calling
 
 ## Inputs
 
