@@ -60,3 +60,7 @@ nextflow run MCrossleyLab/DRIP-seq_STAR_Protocol \
     -resume \
     -params-file ~/.nextflow/assets/MCrossleyLab/DRIP-seq_STAR_Protocol/pipeline_parameters.yml
 ```
+
+## Please cite
+
+Massalha, H., Chee, C. J., Mawer, J. S. P., Puzzo, F. & Crossley, M. P. Protocol for in vivo DNA-RNA hybrid immunoprecipitation sequencing and analysis from frozen mammalian tissues. Preprint at https://doi.org/10.64898/2026.04.06.716701 (2026).
